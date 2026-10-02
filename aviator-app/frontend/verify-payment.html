@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#10131a] text-[#e1e2eb] flex items-center justify-center min-h-screen">
+<div class="text-center p-6">
+  <div id="loading" class="flex flex-col items-center gap-4">
+    <div class="w-12 h-12 border-4 border-[#272a31] border-t-[#05e777] rounded-full animate-spin"></div>
+    <p class="text-lg">Verifying payment...</p>
+  </div>
+  <div id="success" class="hidden flex-col items-center gap-4">
+    <span class="material-symbols-outlined text-[#05e777] text-6xl">check_circle</span>
+    <h1 class="text-2xl font-bold">Payment Successful!</h1>
+    <p id="success-msg" class="text-[#e6bdbc]"></p>
+    <button onclick="window.location.href='/'" class="mt-4 px-6 py-3 rounded-lg bg-[#05e777] text-[#00622e] font-bold">Back to Game</button>
+  </div>
+  <div id="error" class="hidden flex-col items-center gap-4">
+    <span class="material-symbols-outlined text-[#ffb4ab] text-6xl">error</span>
+    <h1 class="text-2xl font-bold">Verification Failed</h1>
+    <p id="error-msg" class="text-[#e6bdbc]"></p>
+    <button onclick="window.location.href='/deposit.html'" class="mt-4 px-6 py-3 rounded-lg bg-[#e51e3d] text-white font-bold">Try Again</button>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref') || params.get('reference');
+
+  if (!ref) {
+    showError('No payment reference found');
+    return;
+  }
+
+  try {
+    const result = await api.verifyPayment(ref);
+    document.getElementById('loading').classList.add('hidden');
+    const successEl = document.getElementById('success');
+    successEl.classList.remove('hidden');
+    successEl.classList.add('flex');
+    document.getElementById('success-msg').textContent = `$${result.amount.toFixed(2)} credited. New balance: $${result.newBalance.toFixed(2)}`;
+  } catch (err) {
+    showError(err.message);
+  }
+})();
+
+function showError(msg) {
+  document.getElementById('loading').classList.add('hidden');
+  const errEl = document.getElementById('error');
+  errEl.classList.remove('hidden');
+  errEl.classList.add('flex');
+  document.getElementById('error-msg').textContent = msg;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Chivo&family=JetBrains+Mono&family=Space+Grotesk&display=swap" rel="stylesheet"/>
+<style>html,body{margin:0;padding:0;background-color:#10131a;}::-webkit-scrollbar{display:none;}</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { darkMode: "class", theme: { extend: {
+  colors: {
+    "surface":"#10131a","surface-container-lowest":"#0b0e14","surface-container-low":"#191c22",
+    "surface-container":"#1d2026","surface-container-high":"#272a31","surface-container-highest":"#32353c",
+    "surface-bright":"#363940","on-surface":"#e1e2eb","on-surface-variant":"#e6bdbc",
+    "primary-container":"#e51e3d","on-primary-container":"#fffeff",
+    "secondary":"#7dffa2","secondary-container":"#05e777","on-secondary-container":"#00622e",
+    "tertiary":"#ddb7ff","tertiary-container":"#9d49eb","on-tertiary-container":"#fffeff",
+    "error":"#ffb4ab","primary":"#ffb3b2","on-primary":"#680013"
+  },
+  fontFamily: {
+    "headline-md":["Space Grotesk"],"body-sm":["Chivo"],"label-telemetry":["JetBrains Mono"],
+    "label-code":["JetBrains Mono"],"button-text":["Space Grotesk"]
+  },
+  fontSize: {
+    "headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],
+    "body-sm":["12px",{"lineHeight":"16px"}],
+    "label-telemetry":["14px",{"lineHeight":"18px","fontWeight":"600"}],
+    "label-code":["11px",{"lineHeight":"14px","fontWeight":"500"}],
+    "button-text":["15px",{"lineHeight":"20px","fontWeight":"700"}]
+  }
+}}};
+</script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl">
+  <div class="h-16 px-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <button onclick="history.back()" class="w-11 h-11 flex items-center justify-center rounded-lg bg-surface-container text-on-surface">
+        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+      </button>
+      <h1 class="font-headline-md text-headline-md uppercase">Deposit</h1>
+    </div>
+    <span class="font-label-telemetry text-label-telemetry text-secondary font-bold" id="balance-display">$0.00</span>
+  </div>
+</header>
+<main class="pt-20 pb-8 px-3">
+  <div class="max-w-md mx-auto flex flex-col gap-4">
+    <div class="bg-surface-container-high p-4 rounded-xl">
+      <span class="font-label-code text-label-code text-tertiary uppercase">100% Bonus Active</span>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Get matched 1:1 up to $1,000 on your first deposit.</p>
+    </div>
+    <div>
+      <span class="font-label-code text-label-code text-on-surface-variant uppercase">Quick Presets</span>
+      <div class="grid grid-cols-3 gap-2 mt-2">
+        <button class="preset-btn py-3 rounded-lg bg-surface-container text-on-surface font-button-text" onclick="selectPreset(25)">+$25</button>
+        <button class="preset-btn py-3 rounded-lg bg-surface-container text-on-surface font-button-text" onclick="selectPreset(50)">+$50</button>
+        <button class="preset-btn py-3 rounded-lg bg-surface-container-high text-secondary font-button-text" onclick="selectPreset(100)">+$100</button>
+        <button class="preset-btn py-3 rounded-lg bg-surface-container text-on-surface font-button-text" onclick="selectPreset(250)">+$250</button>
+        <button class="preset-btn py-3 rounded-lg bg-surface-container text-on-surface font-button-text" onclick="selectPreset(500)">+$500</button>
+        <button class="preset-btn py-3 rounded-lg bg-surface-container text-on-surface font-button-text" onclick="selectPreset(1000)">+$1,000</button>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-4 rounded-lg flex items-center justify-between">
+      <span class="font-headline-md text-headline-md text-secondary font-bold">$</span>
+      <input class="bg-transparent text-on-surface font-headline-md text-headline-md focus:outline-none w-full px-2" id="amount-input" min="10" step="10" type="number" value="100.00"/>
+      <span class="font-label-telemetry text-label-telemetry text-on-surface-variant">USD</span>
+    </div>
+    <button id="deposit-btn" class="w-full py-4 rounded-xl bg-primary-container text-on-primary-container font-headline-md flex items-center justify-between shadow-lg">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined">bolt</span>
+        <span id="deposit-label">Deposit $100.00</span>
+      </div>
+      <span class="material-symbols-outlined">lock</span>
+    </button>
+    <div id="error-display" class="hidden text-error text-sm text-center"></div>
+  </div>
+</main>
+<script src="/js/api.js"></script>
+<script>
+let amount = 100.00;
+
+async function initDeposit() {
+  try {
+    const user = await api.getMe();
+    document.getElementById('balance-display').textContent = `$${user.balance.toFixed(2)}`;
+  } catch (err) {
+    window.location.href = '/';
+  }
+}
+
+function selectPreset(val) {
+  amount = val;
+  document.getElementById('amount-input').value = val.toFixed(2);
+  document.getElementById('deposit-label').textContent = `Deposit $${val.toFixed(2)}`;
+}
+
+document.getElementById('amount-input').addEventListener('input', (e) => {
+  amount = parseFloat(e.target.value) || 0;
+  document.getElementById('deposit-label').textContent = `Deposit $${amount.toFixed(2)}`;
+});
+
+document.getElementById('deposit-btn').onclick = async () => {
+  const errEl = document.getElementById('error-display');
+  errEl.classList.add('hidden');
+
+  if (amount < 10) {
+    errEl.textContent = 'Minimum deposit is $10';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const result = await api.initializeDeposit(amount);
+    window.location.href = result.authorizationUrl;
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+};
+
+initDeposit();
+</script>
+</body>
+</html>
