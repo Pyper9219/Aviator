@@ -1,13 +1,7 @@
-{
-	"version": 2,
-	"builds": [
-		{ "src": "api/index.ts", "use": "@vercel/node" },
-		{ "src": "aviator-app/frontend/**", "use": "@vercel/static" }
-	],
-	"routes": [
-		{ "src": "/api/(.*)", "dest": "/api/index.ts?path=$1" },
-		{ "src": "/js/(.*)", "dest": "/aviator-app/frontend/js/$1" },
-		{ "src": "/(.*\\.html)", "dest": "/aviator-app/frontend/$1" },
-		{ "src": "/(.*)", "dest": "/aviator-app/frontend/$1" }
-	]
+﻿{
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "crons": [
+    { "path": "/api/game/current-round", "schedule": "* * * * *" }
+  ]
 }
