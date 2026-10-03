@@ -14,12 +14,14 @@ export function getPusherServer(): Pusher {
   return pusherServer;
 }
 
-export async function broadcastTick(multiplier: number) {
-  await getPusherServer().trigger("aviator-flight", "TICK", { multiplier });
+export const FLIGHT_CHANNEL = "aviator-flight";
+
+export async function broadcastTick(multiplier: number, roundNumber: number) {
+  await getPusherServer().trigger(FLIGHT_CHANNEL, "TICK", { multiplier, roundNumber });
 }
-export async function broadcastCrash(finalMultiplier: number) {
-  await getPusherServer().trigger("aviator-flight", "ROUND_CRASHED", { finalMultiplier });
+export async function broadcastCrash(finalMultiplier: number, roundNumber: number) {
+  await getPusherServer().trigger(FLIGHT_CHANNEL, "ROUND_CRASHED", { finalMultiplier, roundNumber });
 }
-export async function broadcastPreparing() {
-  await getPusherServer().trigger("aviator-flight", "ROUND_PREPARING", {});
+export async function broadcastPreparing(roundNumber: number) {
+  await getPusherServer().trigger(FLIGHT_CHANNEL, "ROUND_PREPARING", { roundNumber });
 }

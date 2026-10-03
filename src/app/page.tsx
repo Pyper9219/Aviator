@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAviatorSocket } from "@/hooks/useAviatorSocket";
 
 export default function HomePage() {
-  const { multiplier, gameState, balance, history } = useAviatorSocket();
+  const { multiplier, gameState, roundNumber, history } = useAviatorSocket();
   const [betAmount, setBetAmount] = useState(10);
   const [autoCashout, setAutoCashout] = useState(2.0);
 
@@ -15,9 +15,6 @@ export default function HomePage() {
           <h1 className="text-xl font-bold tracking-widest">AVIATOR</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1 rounded-full bg-white/10 text-sm">
-            ${balance.toFixed(2)}
-          </div>
           <button className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-sm font-semibold">
             Deposit
           </button>
@@ -30,8 +27,10 @@ export default function HomePage() {
       <section className="flex-1 grid grid-rows-[auto_1fr_auto] gap-4 p-4">
         <div className="flex items-center gap-2 overflow-x-auto">
           <span className="text-xs text-white/50">Round</span>
-          <span className="px-2 py-1 rounded bg-white/10 text-xs">1</span>
-          <span className="text-xs text-white/50 ml-4">Next round</span>
+          <span className="px-2 py-1 rounded bg-white/10 text-xs">{roundNumber}</span>
+          <span className="text-xs text-white/50 ml-4">
+            {gameState === "PREPARING" ? "Next round" : gameState === "IN_FLIGHT" ? "In flight" : "Crashed"}
+          </span>
           <div className="flex gap-1 ml-auto">
             {history.map((h, i) => (
               <span

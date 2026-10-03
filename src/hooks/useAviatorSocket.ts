@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 import Pusher from "pusher-js";
 
-export function useAviatorSocket(initialBalance = 4850.5) {
+export function useAviatorSocket() {
   const [multiplier, setMultiplier] = useState(1.0);
   const [gameState, setGameState] = useState<"PREPARING" | "IN_FLIGHT" | "CRASHED">("PREPARING");
-  const [balance, setBalance] = useState(initialBalance);
-  const [history, setHistory] = useState<number[]>([4.82, 1.24, 3.15, 14.8, 1.02, 2.64]);
+  const [roundNumber, setRoundNumber] = useState(1);
+  const [history, setHistory] = useState<number[]>([]);
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
@@ -16,17 +16,21 @@ export function useAviatorSocket(initialBalance = 4850.5) {
     const pusher = new Pusher(key, { cluster });
     const channel = pusher.subscribe("aviator-flight");
 
-    channel.bind("TICK", (data: { multiplier: number }) => {
+    channel.bind("TICK", (data: { multiplier: number; roundNumber: number }) => {
       setMultiplier(data.multiplier);
+      setRoundNumber(data.roundNumber);
       setGameState("IN_FLIGHT");
     });
-    channel.bind("ROUND_CRASHED", (data: { finalMultiplier: number }) => {
+
+    channel.bind("ROUND_CRASHED", (data: { finalMultiplier: number; roundNumber: number }) => {
       setMultiplier(data.finalMultiplier);
       setGameState("CRASHED");
       setHistory((prev) => [data.finalMultiplier, ...prev.slice(0, 19)]);
     });
-    channel.bind("ROUND_PREPARING", () => {
+
+    channel.bind("ROUND_PREPARING", (data: { roundNumber: number }) => {
       setMultiplier(1.0);
+      setRoundNumber(data.roundNumber);
       setGameState("PREPARING");
     });
 
@@ -36,5 +40,5 @@ export function useAviatorSocket(initialBalance = 4850.5) {
     };
   }, []);
 
-  return { multiplier, gameState, balance, setBalance, history };
+  return { multiplier, gameState, roundNumber, history };
 }
